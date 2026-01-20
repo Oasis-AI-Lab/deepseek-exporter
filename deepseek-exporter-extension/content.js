@@ -53,52 +53,56 @@ function exportAllConversations() {
 
 // Extract current conversation data
 function extractConversationData() {
-  // Try different selectors for DeepSeek's conversation structure
-  const selectors = [
-    'article[data-testid^="conversation-"]',
-    '[class*="message"]',
-    '[class*="chat"]',
-    '[role="presentation"]'
-  ];
-  
   let messages = [];
   
-  // Try to find message elements
-  for (const selector of selectors) {
-    const elements = document.querySelectorAll(selector);
-    if (elements.length > 0) {
-      elements.forEach(el => {
-        const role = el.querySelector('[class*="user"], [class*="assistant"]') 
-          ? 'assistant'
-          : 'user';
-        
-        const content = el.innerText?.trim();
-        if (content) {
-          messages.push({ role, content });
-        }
-      });
-      
-      if (messages.length > 0) break;
-    }
-  }
+  // Find all ds-message elements
+  const messageElements = document.querySelectorAll('.ds-message');
   
-  // Fallback: Try to parse from page content
-  if (messages.length === 0) {
-    const pageContent = document.body.innerText;
-    if (pageContent) {
-      // Simple heuristic: split by common patterns
-      const parts = pageContent.split(/\\n{3,}/);
-      parts.forEach(part => {
-        if (part.trim()) {
-          messages.push({ role: 'assistant', content: part.trim() });
-        }
-      });
-    }
-  }
-  
-  if (messages.length === 0) {
+  if (messageElements.length === 0) {
+    console.log('No .ds-message elements found');
     return null;
   }
+  
+  console.log(`Found ${messageElements.length} message elements`);
+  
+  // Extract each message
+  messageElements.forEach((el, index) => {
+    try {
+      // Determine if it's user or assistant
+      // User messages have simpler structure, assistant messages have ds-markdown
+      const isAssistant = el.querySelector('.ds-markdown') !== null;
+      const role = isAssistant ? 'assistant' : 'user';
+      
+      // Extract content
+      let content = '';
+      
+      if (isAssistant) {
+        // Assistant message: get markdown content
+        const markdownEl = el.querySelector('.ds-markdown');
+        if (markdownEl) {
+          content = markdownEl.innerText?.trim() || '';
+        }
+      } else {
+        // User message: get direct text content
+        content = el.innerText?.trim() || '';
+      }
+      
+      // Only add if there's content
+      if (content && content.length > 0) {
+        messages.push({ role, content });
+        console.log(`Message ${index + 1} (${role}): ${content.substring(0, 50)}...`);
+      }
+    } catch (error) {
+      console.error('Error extracting message:', error);
+    }
+  });
+  
+  if (messages.length === 0) {
+    console.log('No messages extracted');
+    return null;
+  }
+  
+  console.log(`Successfully extracted ${messages.length} messages`);
   
   const title = extractTitle();
   
@@ -140,17 +144,20 @@ function extractAllConversations() {
 
 // Extract conversation title
 function extractTitle() {
+  // Try to find title in the conversation header
   const titleSelectors = [
-    'h1',
+    '.afa34042.e37a04e4.e0a1edb7', // Specific class for conversation title
     '[class*="title"]',
-    'head title'
+    'h1',
+    '._765a5cd' // Parent container that might contain title
   ];
   
   for (const selector of titleSelectors) {
     const element = document.querySelector(selector);
     if (element) {
       const title = element.textContent?.trim();
-      if (title && title !== 'DeepSeek') {
+      if (title && title !== 'DeepSeek' && title !== '探索未至之境' && title.length > 2) {
+        console.log('Found title:', title);
         return title;
       }
     }
