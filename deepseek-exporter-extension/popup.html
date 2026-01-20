@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeepSeek Exporter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="icons/icon48.png" alt="DeepSeek Exporter" class="logo">
+      <h1>DeepSeek Exporter</h1>
+    </div>
+    
+    <div class="content">
+      <p class="subtitle">Export your conversations to Markdown</p>
+      
+      <div id="status" class="status hidden">
+        <span id="status-text"></span>
+      </div>
+      
+      <div class="actions">
+        <button id="exportBtn" class="btn primary">
+          <span class="btn-icon">📥</span>
+          Export Conversation
+        </button>
+        <button id="exportAllBtn" class="btn secondary">
+          <span class="btn-icon">📚</span>
+          Export All Conversations
+        </button>
+      </div>
+      
+      <div class="info">
+        <p><strong>Note:</strong> This extension only works on DeepSeek's official website.</p>
+      </div>
+      
+      <div class="footer">
+        <a href="https://github.com/Oasis-AI-Lab/deepseek-exporter" target="_blank" class="github-link">
+          <span class="github-icon">🐙</span>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
